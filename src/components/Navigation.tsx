@@ -9,9 +9,11 @@ import {
   BookOpen, 
   Settings,
   Menu,
-  X
+  X,
+  Brain
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AIControlPanel } from "./AIControlPanel";
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -25,6 +27,7 @@ const navItems = [
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
   const location = useLocation();
 
   return (
@@ -38,6 +41,19 @@ export function Navigation() {
           className="glass-card"
         >
           {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {/* AI Control Panel Trigger */}
+      <div className="fixed top-4 right-4 z-50">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setIsAIPanelOpen(!isAIPanelOpen)}
+          className="glass-card group hover:bg-primary/20"
+          title="AI Control Panel"
+        >
+          <Brain className={`h-4 w-4 transition-colors ${isAIPanelOpen ? 'text-primary' : 'group-hover:text-primary'}`} />
         </Button>
       </div>
 
@@ -98,6 +114,12 @@ export function Navigation() {
           onClick={() => setIsOpen(false)}
         />
       )}
+
+      {/* AI Control Panel */}
+      <AIControlPanel 
+        isOpen={isAIPanelOpen} 
+        onClose={() => setIsAIPanelOpen(false)} 
+      />
     </>
   );
 }

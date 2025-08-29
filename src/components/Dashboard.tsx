@@ -82,16 +82,8 @@ export function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl">
-        <div className="absolute inset-0">
-          <img 
-            src={heroImage} 
-            alt="AI Automation Platform" 
-            className="w-full h-full object-cover opacity-20"
-          />
-          <div className="absolute inset-0 bg-gradient-primary/20"></div>
-        </div>
-        <div className="relative text-center space-y-6 py-20 px-6">
+      <div className="glass-card rounded-3xl">
+        <div className="text-center space-y-6 py-20 px-6">
           <h1 className="text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             The Future of Business Automation
           </h1>
