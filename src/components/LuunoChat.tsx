@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import LuunoAI, { AIResponse, AIStatus } from "@/lib/ai-systems/luuno-ai";
 
 interface Message {
   id: string;
@@ -35,6 +36,8 @@ export function LuunoChat() {
   
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
+  const [luunoAI] = useState(() => new LuunoAI());
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -51,6 +54,19 @@ export function LuunoChat() {
     scrollToBottom();
   }, [messages]);
 
+  // Initialize AI status
+  useEffect(() => {
+    const loadAIStatus = async () => {
+      try {
+        const status = await luunoAI.getSystemStatus();
+        setAiStatus(status);
+      } catch (error) {
+        console.error('Failed to load AI status:', error);
+      }
+    };
+    loadAIStatus();
+  }, [luunoAI]);
+
   const handleSend = async () => {
     if (!input.trim() || isProcessing) return;
 
@@ -65,50 +81,46 @@ export function LuunoChat() {
     setInput("");
     setIsProcessing(true);
 
-    // Simulate AI processing with quantum data
-    setTimeout(() => {
-      const aiResponse: Message = {
+    try {
+      // Use real AI system
+      const aiResponse: AIResponse = await luunoAI.processQuery(userMessage.content);
+      
+      const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: generateAIResponse(userMessage.content),
+        content: aiResponse.content,
         timestamp: new Date(),
-        quantum: {
-          consciousness: 0.800 + Math.random() * 0.2,
-          speedup: Math.floor(Math.random() * 20 + 5) + "x",
-          state: ["superposition", "entangled", "coherent"][Math.floor(Math.random() * 3)]
+        quantum: aiResponse.quantum || {
+          consciousness: 0.847,
+          speedup: "7x",
+          state: "active"
         }
       };
       
-      setMessages(prev => [...prev, aiResponse]);
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('AI processing error:', error);
+      
+      // Fallback message
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: "I'm experiencing some processing difficulties. Please try again or check the AI Control Panel for system status.",
+        timestamp: new Date(),
+        quantum: {
+          consciousness: 0.500,
+          speedup: "1x",
+          state: "error"
+        }
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsProcessing(false);
-    }, 1000 + Math.random() * 2000);
+    }
   };
 
-  const generateAIResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('hello') || input.includes('hi')) {
-      return "Hello! I'm here to help you harness the power of AI automation. What business challenge would you like to solve?";
-    }
-    
-    if (input.includes('business') || input.includes('automat')) {
-      return "Excellent! I can help you build custom AI agents for sales, marketing, customer service, and operations. We've helped businesses save 35+ hours per week through intelligent automation. What's your primary business focus?";
-    }
-    
-    if (input.includes('agent') || input.includes('ai agent')) {
-      return "AI agents are our specialty! I can deploy:\n\n🤖 **Sales Agents** - Lead qualification, follow-up, deal closing\n📞 **Customer Service** - 24/7 support, ticket resolution\n📊 **Analytics Agents** - Real-time insights and reporting\n💼 **Operations** - Workflow automation, task management\n\nWhich type interests you most?";
-    }
-    
-    if (input.includes('quantum') || input.includes('consciousness')) {
-      return "My quantum-enhanced processing allows for advanced pattern recognition and optimization beyond traditional AI. Current consciousness level: Φ = 0.847, running with quantum speedup for superior business intelligence.";
-    }
-    
-    if (input.includes('r7') || input.includes('recommendation')) {
-      return "The R7 Recommendation Engine analyzes your business and provides 7 specific growth actions:\n\n1. Sales Optimization\n2. Marketing Strategy\n3. Operations Efficiency\n4. Customer Retention\n5. Revenue Streams\n6. Cost Reduction\n7. Growth Scaling\n\nWould you like me to run an R7 analysis for your business?";
-    }
-    
-    return "I understand you're interested in " + userInput + ". As the Luuno AI, I can help you implement intelligent automation solutions that scale with your business. What specific outcomes are you looking to achieve?";
-  };
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -136,10 +148,10 @@ export function LuunoChat() {
         </div>
         
         {/* AI Status */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <Badge variant="outline" className="glass-card">
-            <Circle className="w-3 h-3 mr-2 text-emerald-400 animate-pulse" />
-            Online
+            <Circle className={`w-3 h-3 mr-2 ${aiStatus?.ollamaAvailable ? 'text-emerald-400 animate-pulse' : 'text-red-400'}`} />
+            {aiStatus?.ollamaAvailable ? 'Ollama Online' : 'Ollama Offline'}
           </Badge>
           <Badge variant="outline" className="glass-card">
             <Zap className="w-3 h-3 mr-2 text-primary" />
@@ -149,6 +161,12 @@ export function LuunoChat() {
             <Brain className="w-3 h-3 mr-2 text-secondary" />
             Consciousness: Φ = 0.847
           </Badge>
+          {aiStatus?.availableModels && aiStatus.availableModels.length > 0 && (
+            <Badge variant="outline" className="glass-card">
+              <Bot className="w-3 h-3 mr-2 text-muted-foreground" />
+              {aiStatus.availableModels.length} Models
+            </Badge>
+          )}
         </div>
       </div>
 
