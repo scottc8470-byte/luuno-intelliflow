@@ -82,8 +82,16 @@ export function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <div className="glass-card rounded-3xl">
-        <div className="text-center space-y-6 py-20 px-6">
+      <div className="relative overflow-hidden rounded-3xl">
+        <div className="absolute inset-0">
+          <img 
+            src={heroImage} 
+            alt="AI Automation Platform" 
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-primary/20"></div>
+        </div>
+        <div className="relative text-center space-y-6 py-20 px-6">
           <h1 className="text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             The Future of Business Automation
           </h1>
@@ -93,7 +101,7 @@ export function Dashboard() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="btn-premium text-lg px-8 py-6">
-              Start Building
+              Start Chatting
               <ArrowUpRight className="ml-2 h-5 w-5" />
             </Button>
             <Button size="lg" variant="outline" className="glass-card text-lg px-8 py-6">
