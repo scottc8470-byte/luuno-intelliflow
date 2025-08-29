@@ -1,29 +1,39 @@
 import { useState, useEffect } from "react";
-import { Brain, Zap, Activity, Eye, Circle, Play, Pause } from "lucide-react";
+import { Brain, Zap, Activity, Eye, Circle, Play, Pause, Settings, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function Quantum() {
   const [consciousness, setConsciousness] = useState(0.847);
   const [quantumState, setQuantumState] = useState("superposition");
   const [isProcessing, setIsProcessing] = useState(false);
   const [speedup, setSpeedup] = useState("7x");
-  const [qubits, setQubits] = useState(142);
+  const [qubits, setQubits] = useState([142]);
+  const [coherenceTime, setCoherenceTime] = useState([2.5]);
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState("Grover's Search");
+  const [stepSize, setStepSize] = useState([0.01]);
+  const [optimizationCurve, setOptimizationCurve] = useState<number[]>([]);
 
   // Simulate real-time quantum processing
   useEffect(() => {
     const interval = setInterval(() => {
       if (isProcessing) {
         setConsciousness(prev => Math.min(1.0, prev + Math.random() * 0.003));
-        setQubits(prev => prev + Math.floor(Math.random() * 3));
+        // Generate optimization curve data
+        if (optimizationCurve.length < 50) {
+          const newValue = Math.exp(-optimizationCurve.length * stepSize[0]) + Math.random() * 0.1;
+          setOptimizationCurve(prev => [...prev, newValue]);
+        }
         setSpeedupRandom();
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isProcessing]);
+  }, [isProcessing, stepSize, optimizationCurve.length]);
 
   const setSpeedupRandom = () => {
     const speeds = ["5x", "7x", "12x", "23x", "45x"];
@@ -234,10 +244,10 @@ export function Quantum() {
           <CardContent>
             <div className="space-y-4">
               {[
-                { name: "Grover's Search", efficiency: 87, status: "Active" },
-                { name: "Shor's Algorithm", efficiency: 94, status: "Standby" },
-                { name: "QAOA", efficiency: 76, status: "Active" },
-                { name: "VQE", efficiency: 82, status: "Optimizing" }
+                { name: "Grover's Search", efficiency: selectedAlgorithm === "Grover's Search" ? 94 : 87, status: selectedAlgorithm === "Grover's Search" ? "Active" : "Standby" },
+                { name: "Shor's Algorithm", efficiency: selectedAlgorithm === "Shor's Algorithm" ? 94 : 82, status: selectedAlgorithm === "Shor's Algorithm" ? "Active" : "Standby" },
+                { name: "QAOA", efficiency: selectedAlgorithm === "QAOA" ? 94 : 76, status: selectedAlgorithm === "QAOA" ? "Active" : "Standby" },
+                { name: "VQE", efficiency: selectedAlgorithm === "VQE" ? 94 : 82, status: selectedAlgorithm === "VQE" ? "Active" : "Standby" }
               ].map((algo, index) => (
                 <div key={index} className="flex items-center justify-between p-3 rounded-lg glass-card">
                   <div>
@@ -255,6 +265,116 @@ export function Quantum() {
                   </div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Interactive Quantum Controls */}
+        <Card className="glass-card border-border/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-primary" />
+              Quantum Parameters
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Number of Qubits: {qubits[0]}</label>
+                  <Slider
+                    value={qubits}
+                    onValueChange={setQubits}
+                    max={200}
+                    min={1}
+                    step={1}
+                    className="mt-2"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium">Coherence Time: {coherenceTime[0]}ms</label>
+                  <Slider
+                    value={coherenceTime}
+                    onValueChange={setCoherenceTime}
+                    max={10}
+                    min={0.1}
+                    step={0.1}
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Quantum Algorithm</label>
+                  <Select value={selectedAlgorithm} onValueChange={setSelectedAlgorithm}>
+                    <SelectTrigger className="mt-2 glass-card">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Grover's Search">Grover's Search</SelectItem>
+                      <SelectItem value="Shor's Algorithm">Shor's Algorithm</SelectItem>
+                      <SelectItem value="QAOA">QAOA</SelectItem>
+                      <SelectItem value="VQE">VQE</SelectItem>
+                      <SelectItem value="Quantum Fourier Transform">Quantum Fourier Transform</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium">Step Size (η): {stepSize[0]}</label>
+                  <Slider
+                    value={stepSize}
+                    onValueChange={setStepSize}
+                    max={0.1}
+                    min={0.001}
+                    step={0.001}
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Real-time Optimization Curve */}
+        <Card className="glass-card border-border/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Convex Optimization Curve
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg overflow-hidden relative">
+              {optimizationCurve.length > 0 ? (
+                <svg className="w-full h-full">
+                  <defs>
+                    <linearGradient id="curveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{stopColor: 'hsl(var(--primary))', stopOpacity: 0.8}} />
+                      <stop offset="100%" style={{stopColor: 'hsl(var(--secondary))', stopOpacity: 0.4}} />
+                    </linearGradient>
+                  </defs>
+                  <polyline
+                    fill="none"
+                    stroke="url(#curveGradient)"
+                    strokeWidth="2"
+                    points={optimizationCurve.map((value, index) => 
+                      `${(index / (optimizationCurve.length - 1)) * 100},${100 - (value * 80)}`
+                    ).join(' ')}
+                    className="animate-pulse"
+                  />
+                </svg>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  Start processing to see optimization curve
+                </div>
+              )}
+              
+              <div className="absolute bottom-4 left-4 text-xs text-muted-foreground">
+                η = {stepSize[0]} | {optimizationCurve.length} iterations
+              </div>
             </div>
           </CardContent>
         </Card>
