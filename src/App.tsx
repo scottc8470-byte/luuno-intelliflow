@@ -5,11 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { Dashboard } from "./components/Dashboard";
+import { LuunoAI } from "./components/LuunoAI";
 import { AIAgents } from "./components/AIAgents";
 import { Workflows } from "./components/Workflows";
 import { Analytics } from "./components/Analytics";
 import { Community } from "./components/Community";
 import { Knowledge } from "./components/Knowledge";
+import { Quantum } from "./components/Quantum";
 import { Settings } from "./components/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -24,11 +26,13 @@ const App = () => (
         <Layout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/luuno-ai" element={<LuunoAI />} />
             <Route path="/agents" element={<AIAgents />} />
             <Route path="/workflows" element={<Workflows />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/community" element={<Community />} />
             <Route path="/knowledge" element={<Knowledge />} />
+            <Route path="/quantum" element={<Quantum />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -9,17 +9,21 @@ import {
   BookOpen, 
   Settings,
   Menu,
-  X
+  X,
+  MessageSquare,
+  Brain
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Luuno AI", href: "/luuno-ai", icon: MessageSquare },
   { name: "AI Agents", href: "/agents", icon: Bot },
   { name: "Workflows", href: "/workflows", icon: Zap },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Community", href: "/community", icon: Users },
   { name: "Knowledge", href: "/knowledge", icon: BookOpen },
+  { name: "Quantum", href: "/quantum", icon: Brain },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 

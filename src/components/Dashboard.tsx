@@ -101,7 +101,7 @@ export function Dashboard() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="btn-premium text-lg px-8 py-6">
-              Start Building
+              Start Chatting
               <ArrowUpRight className="ml-2 h-5 w-5" />
             </Button>
             <Button size="lg" variant="outline" className="glass-card text-lg px-8 py-6">
