@@ -13,11 +13,11 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">404</h1>
-        <p className="text-xl text-muted-foreground">Oops! Page not found</p>
-        <a href="/" className="inline-block px-6 py-3 bg-gradient-primary text-white rounded-lg hover:shadow-premium transition-all duration-300">
-          Return to Dashboard
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">404</h1>
+        <p className="text-xl text-muted-foreground mb-4">Oops! Page not found</p>
+        <a href="/" className="text-accent hover:text-accent/80 underline">
+          Return to Home
         </a>
       </div>
     </div>

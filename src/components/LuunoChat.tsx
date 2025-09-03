@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import LuunoAI, { AIResponse, AIStatus } from "@/lib/ai-systems/luuno-ai";
 
 interface Message {
@@ -37,6 +38,8 @@ export function LuunoChat() {
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
+  const [currentPersonality, setCurrentPersonality] = useState("balanced");
+  const [userSelectedSystem, setUserSelectedSystem] = useState("ollama");  // NEW: User selects system
   const [luunoAI] = useState(() => new LuunoAI());
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -82,8 +85,8 @@ export function LuunoChat() {
     setIsProcessing(true);
 
     try {
-      // Use real AI system
-      const aiResponse: AIResponse = await luunoAI.processQuery(userMessage.content);
+      // Use real AI system with current personality and user-selected system
+      const aiResponse: AIResponse = await luunoAI.processQuery(userMessage.content, [], currentPersonality, userSelectedSystem);
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -147,8 +150,8 @@ export function LuunoChat() {
           </div>
         </div>
         
-        {/* AI Status */}
-        <div className="flex gap-3 flex-wrap">
+        {/* AI Status Badges */}
+        <div className="flex gap-3 flex-wrap items-center">
           <Badge variant="outline" className="glass-card">
             <Circle className={`w-3 h-3 mr-2 ${aiStatus?.ollamaAvailable ? 'text-emerald-400 animate-pulse' : 'text-red-400'}`} />
             {aiStatus?.ollamaAvailable ? 'Ollama Online' : 'Ollama Offline'}

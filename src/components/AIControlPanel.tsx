@@ -8,27 +8,28 @@ import { Badge } from "@/components/ui/badge";
 interface AIControlPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  currentPersonality: string;
+  onPersonalityChange: (personality: string) => void;
 }
 
-export function AIControlPanel({ isOpen, onClose }: AIControlPanelProps) {
-  const [personalityMode, setPersonalityMode] = useState("balanced");
+export function AIControlPanel({ isOpen, onClose, currentPersonality, onPersonalityChange }: AIControlPanelProps) {
+  console.log('AIControlPanel loaded with personality:', currentPersonality);
   
   if (!isOpen) return null;
 
   const personalityModes = [
-    { value: "balanced", label: "⚖️ Balanced", description: "Optimal balance of speed and accuracy" },
-    { value: "rodeo", label: "🤠 Rodeo AGI", description: "High-performance autonomous mode" },
-    { value: "academic", label: "🎓 Academic", description: "Research-focused analytical mode" },
-    { value: "hybrid", label: "🔄 Hybrid", description: "Adaptive multi-modal approach" }
+    { value: "balanced", label: "⚖️ Balanced", description: "Optimal balance of speed and accuracy - Team use" },
+    { value: "strict_business", label: "💼 Strict Business", description: "Professional business focus - Client demos" },
+    { value: "quantum_expert", label: "⚛️ Quantum Expert", description: "Technical quantum expertise - Technical queries" }
   ];
 
   const systemStatus = [
     { label: "🧠 Local LLM", status: "🟢 Online", description: "Connected" },
-    { label: "📦 Available Models", status: "llama2:7b, llama3.2", description: "2 models loaded" },
+    { label: "📦 Available Models", status: "llama3.2", description: "1 model loaded" },
     { label: "⚡ Quantum Core", status: "🟢 Active", description: "Processing ready" },
     { label: "🔗 Blockchain", status: "🟢 Verified", description: "Hash validated" },
     { label: "📊 Knowledge Graph", status: "🟢 Loaded", description: "15.2K nodes" },
-    { label: "🧠 ChatGPT API", status: "🟢 Connected", description: "API key valid" },
+    { label: "🎭 Personality System", status: "🟢 Active", description: "2 modes available" },
     { label: "💾 Memory System", status: "🟢 Active", description: "3 sessions" }
   ];
 
@@ -38,7 +39,7 @@ export function AIControlPanel({ isOpen, onClose }: AIControlPanelProps) {
     { label: "🧠 Test Consciousness", description: "Calculate Φ values" },
     { label: "⚛️ Quantum Demo", description: "Show quantum visualization" },
     { label: "🔗 Show Knowledge Graph", description: "Display neural network" },
-    { label: "🧪 Test ChatGPT", description: "Test API connection" }
+    { label: "🎭 Test Personality", description: "Test current personality mode" }
   ];
 
   const metrics = {
@@ -86,7 +87,7 @@ export function AIControlPanel({ isOpen, onClose }: AIControlPanelProps) {
                 <CardTitle className="text-sm">AI Personality Mode</CardTitle>
               </CardHeader>
               <CardContent>
-                <Select value={personalityMode} onValueChange={setPersonalityMode}>
+                <Select value={currentPersonality} onValueChange={onPersonalityChange}>
                   <SelectTrigger className="glass-card">
                     <SelectValue />
                   </SelectTrigger>

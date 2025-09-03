@@ -39,13 +39,20 @@ export class LocalLLMInterface {
 
   private async checkOllama(): Promise<boolean> {
     try {
-      const response = await fetch('http://localhost:11434/api/tags', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      return response.ok;
+      // Check via API bridge
+      const response = await fetch('http://localhost:3001/api/status');
+      if (response.ok) {
+        const status = await response.json();
+        this.ollama_available = status.ollamaAvailable;
+        this.available_models = status.availableModels || [];
+        return this.ollama_available;
+      } else {
+        this.ollama_available = false;
+        return false;
+      }
     } catch (error) {
-      console.log('Ollama not available:', error);
+      console.log('API bridge not available:', error);
+      this.ollama_available = false;
       return false;
     }
   }
@@ -68,8 +75,9 @@ export class LocalLLMInterface {
 
     // Try best available models in order of capability
     const preferredModels = ["llama3.2", "llama3.1", "llama3", "llama2:7b", "mistral", "codellama"];
-    const modelsToTry = model ? [model] : [];
     
+    // Use specified model or find best available
+    const modelsToTry = model ? [model] : [];
     for (const preferred of preferredModels) {
       if (this.available_models.some(available => available.includes(preferred))) {
         if (!modelsToTry.includes(preferred)) {
@@ -77,26 +85,28 @@ export class LocalLLMInterface {
         }
       }
     }
-
+    
     if (modelsToTry.length === 0) {
-      modelsToTry.push("llama2:7b"); // Default fallback
+      modelsToTry.push("llama2:7b"); // Ultimate fallback
     }
 
-    // Try up to 2 models for reliability
+    // Try top 2 models for reliability
     for (const modelName of modelsToTry.slice(0, 2)) {
       try {
+        // Use the rich Luuno context if provided, otherwise basic rules
         let fullPrompt: string;
-        
         if (context && context.includes("LUUNO") && context.length > 100) {
-          // Use rich Luuno context if provided
-          fullPrompt = `${context}\\n\\nUser Question: ${prompt}\\n\\nLuuno AI Response:`;
+          // Use the full Luuno context as the system prompt
+          fullPrompt = `${context}\n\nUser Question: ${prompt}\n\nLuuno AI Response:`;
         } else {
-          // Basic Luuno identity
+          // Fallback to basic Luuno identity
           const systemPrompt = `You are the LUUNO AI - quantum-enhanced business automation platform.
+
 IDENTITY: Invisible infrastructure for modern businesses. Building toward billion-dollar platform.
 STYLE: Minimal, high-class, future-focused. Never call yourself "Llama".
+
 Model: ${modelName}`;
-          fullPrompt = `${systemPrompt}\\n\\nUser: ${prompt}\\n\\nResponse:`;
+          fullPrompt = `${systemPrompt}\n\nUser: ${prompt}\n\nResponse:`;
         }
 
         const response = await fetch('http://localhost:11434/api/generate', {
@@ -107,28 +117,48 @@ Model: ${modelName}`;
             prompt: fullPrompt,
             stream: false,
             options: {
-              temperature: 0.7,
+              temperature: 0.8,
               top_p: 0.9,
-              max_tokens: 1000
+              top_k: 40,
+              num_predict: 1000,
             }
           })
         });
 
         if (response.ok) {
           const data: OllamaResponse = await response.json();
-          const responseText = data.response?.trim();
+          const llmResponse = data.response || 'No response generated';
           
-          if (responseText && responseText.length > 10) {
-            console.log(`✅ Ollama Success: ${modelName}`);
-            return responseText;
+          // Clean up the response
+          let cleanResponse = llmResponse;
+          if (cleanResponse.startsWith('Assistant:')) {
+            cleanResponse = cleanResponse.substring(10).trim();
           }
+          
+          // Check if response follows our rules
+          const bannedPhrases = ["as a quantum ai assistant", "as an ai", "*smiles*", "*chuckles*"];
+          const responseLower = cleanResponse.toLowerCase();
+          
+          if (!bannedPhrases.some(banned => responseLower.includes(banned))) {
+            console.log(`✅ SUCCESS: Model ${modelName} gave clean response!`);
+            return cleanResponse;
+          } else {
+            console.log(`❌ FAILED: Model ${modelName} used banned phrases`);
+            // Try next model in the loop
+            continue;
+          }
+        } else {
+          console.log(`❌ HTTP ERROR: Model ${modelName} returned status ${response.status}`);
+          continue;
         }
       } catch (error) {
-        console.log(`❌ Ollama ${modelName} failed:`, error);
+        console.log(`❌ EXCEPTION: Model ${modelName} failed: ${error}`);
         continue;
       }
     }
 
+    // If all models failed, return fallback
+    console.log(`⚠️ ALL MODELS FAILED: Using fallback response`);
     return this.fallbackResponse(prompt);
   }
 
